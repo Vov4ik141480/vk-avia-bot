@@ -112,14 +112,17 @@ class UserData(Period, City, Date):
         self.bot.send_message(user_id, collected_data, keyboard)
 
     def start_searching(self, user_id, user_message):
-        """Отправляет приветственное сообщение новому юзеру или 
-        инициализирует новый поиск или отправляет info о боте.
+        """Отправляет приветственное сообщение новому юзеру, 
+        инициализирует новый поиск, отправляет info о боте,
+        отправляет подсказку.
         """
         if user_message == 'start':
             self.bot.send_welcome(user_id)
         elif user_message == 'начать поиск':
             self.request_period(user_id, message_for_period)
             self.switch_user_status(user_id, 'check_period')
+        elif user_message == 'help':
+            self.bot.send_help(user_id)
         else:
             self.bot.send_hint(user_id)
 
