@@ -1,13 +1,20 @@
 # coding: 'utf' - 8
 """Сервер Vk бота"""
 import asyncio
+import logging
 from collections import defaultdict, deque
 
 import get_user_data
 import get_ticket_data
-import send_result 
+import send_result
 from worker import Worker
 from vk_longpoll import VkServer
+
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 
 class Bot:
@@ -27,30 +34,30 @@ class Bot:
         poller = loop.create_task(self.vk_server.get_event())
         worker = loop.create_task(self.worker._worker())
         loop.run_in_executor(
-            None, 
-            get_user_data.start, 
-            self.db, 
+            None,
+            get_user_data.start,
+            self.db,
             self.messages_queue,
-            self.complite_users_data_queue
-            )
+            self.complite_users_data_queue,
+        )
         loop.run_in_executor(
             None,
             get_ticket_data.start,
             self.complite_users_data_queue,
-            self.tickets_queue
-            )
-        loop.run_in_executor(None, send_result.start, self.tickets_queue)                    
+            self.tickets_queue,
+        )
+        loop.run_in_executor(None, send_result.start, self.tickets_queue)
         tasks = asyncio.gather(poller, worker)
         loop.run_until_complete(tasks)
-        
+
         """В случае получения сигнала остановки цикла собирает не 
         завершенные задачи, отменяет их, затем снова запускает цикл, 
         пока эти задачи не будут выполнены
         """
-        pending = asyncio.all_tasks(loop=loop) 
+        pending = asyncio.all_tasks(loop=loop)
         for task in pending:
             task.cancel()
-        group = asyncio.gather(*pending, return_exceptions=True) 
+        group = asyncio.gather(*pending, return_exceptions=True)
         loop.run_until_complete(group)
         loop.close()
 
@@ -60,8 +67,10 @@ def main():
     bot = Bot()
     try:
         bot.start()
-    except Exception as exc:
-        print(exc.args[0])
+    except Exception:
+        import traceback
+
+        logger.warning(traceback.format_exc())
 
 
 if __name__ == "__main__":
