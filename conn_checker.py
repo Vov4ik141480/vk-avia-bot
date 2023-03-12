@@ -1,14 +1,12 @@
 import socket
 
 
-def check_connection():
-    try:
-        socket.create_connection(("www.google.com", 80))
-        return True
-    except Exception as exc:
-        return False
+socket_address = ("www.google.com", 80)
 
-
-async def connection_status():
-    conn_status = check_connection()
-    return conn_status
+async def get_connection_status():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM):
+        try:
+            socket.create_connection(socket_address, timeout=1.0)
+            return True
+        except Exception:
+            return False
