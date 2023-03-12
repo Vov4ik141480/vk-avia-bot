@@ -9,4 +9,6 @@ def check_connection():
         return False
 
 
-check_connection()
+async def connection_status():
+    conn_status = check_connection()
+    return conn_status
