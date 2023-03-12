@@ -29,7 +29,7 @@ class Bot:
         self.worker = Worker(self.events_queue, self.messages_queue)
 
     def start(self):
-        """Запускает компаненты бота (корутины) в бесконечном цикле"""
+        """Запускает компоненты бота (корутины) в бесконечном цикле"""
         loop = asyncio.get_event_loop()
         poller = loop.create_task(self.vk_server.get_event())
         worker = loop.create_task(self.worker._worker())
@@ -50,8 +50,8 @@ class Bot:
         tasks = asyncio.gather(poller, worker)
         loop.run_until_complete(tasks)
 
-        """В случае получения сигнала остановки цикла собирает не 
-        завершенные задачи, отменяет их, затем снова запускает цикл, 
+        """В случае получения сигнала остановки цикла собирает не
+        завершенные задачи, отменяет их, затем снова запускает цикл,
         пока эти задачи не будут выполнены
         """
         pending = asyncio.all_tasks(loop=loop)
