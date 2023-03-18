@@ -1,7 +1,8 @@
 # coding: 'utf' - 8
 """Сервер Vk бота"""
 import asyncio
-import logging
+import logging.config
+import traceback
 from collections import defaultdict, deque
 
 import get_user_data
@@ -9,12 +10,11 @@ import get_ticket_data
 import send_result
 from worker import Worker
 from vk_longpoll import VkServer
+from log import log_config
 
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
-logger = logging.getLogger(__name__)
+logging.config.dictConfig(log_config)
+log_bot = logging.getLogger("main")
 
 
 class Bot:
@@ -68,9 +68,7 @@ def main():
     try:
         bot.start()
     except Exception:
-        import traceback
-
-        logger.warning(traceback.format_exc())
+        log_bot.error(traceback.format_exc(limit=2))
 
 
 if __name__ == "__main__":
