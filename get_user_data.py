@@ -1,6 +1,8 @@
 # coding: utf - 8
 """Обработчик данных от пользователя на правильность вводимой информации"""
 import asyncio
+import logging.config
+import traceback
 
 from attr import attrs, attrib
 
@@ -10,10 +12,15 @@ import selection_confirmation
 import exceptions
 from vk_utils import period_keyboard, prove_keyboard
 from bot_utils import BotSendMethod
-from template_messages import message_for_period, message_for_depart, message_for_arrive
+from template_messages import message_for_period, message_for_depart, message_for_arrive, \
+     CRITICAL_WARNING_MESSAGE, NON_CRITICAL_WARNING_MESSAGE
 from conn_checker import get_connection_status
 from config import ALLOWED_PERIOD_FORMAT
+from log import log_config
 
+
+logging.config.dictConfig(log_config)
+logger = logging.getLogger("main")
 
 @attrs
 class Objects:
@@ -147,14 +154,14 @@ class UserData(Period, City, Date):
             city_name, airport_code = self.check_city(
                 user_message
             )
-        except exceptions.NotCriticalExeption as exc:
-            self.bot.send_warning(user_id, exc.args[0])
+        except exceptions.NotCriticalExeption:
+            self.bot.send_warning(user_id, NON_CRITICAL_WARNING_MESSAGE)
+            logger.info(traceback.format_exc(limit=2))
             self.request_city(user_id, request_message)
-        except exceptions.CriticalExeption as exc:
-            self.bot.send_warning(user_id, exc.args[0])
-            raise exc
-            # logging
-            # return вместо raise
+        except exceptions.CriticalExeption:
+            self.bot.send_warning(user_id, CRITICAL_WARNING_MESSAGE)
+            logger.error(traceback.format_exc(limit=2))
+            raise 
         except exceptions.NotFoundException:
             warning_message = "Город с таким названием не найден!"
             self.bot.send_warning(user_id, warning_message)
@@ -241,8 +248,8 @@ class UserData(Period, City, Date):
 
                     else:
                         self.start_searching(user_id, user_message)
-            except Exception as exc:
-                raise exc
+            except Exception:
+                return
 
 
 async def main(users_db, user_request_data, complite_user_data):
