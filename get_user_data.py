@@ -47,23 +47,12 @@ class City(Objects):
         """
         self.bot.send_message(user_id, request_message, None)
 
-    def check_city(self, user_id, user_message, request_message):
+    def check_city(self, user_message):
         """Возвращает ответ от api проверки названия города"""
-        try:
-            city_name, airport_code = city_names_api.check_on_valid_city_name(
-                user_message
-            )
-        except exceptions.NotCriticalExeption as exc:
-            self.bot.send_warning(user_id, exc.args[0])
-            self.request_city(user_id, request_message)
-        except exceptions.CriticalExeption as exc:
-            raise exc
-        except exceptions.NotFoundException:
-            warning_message = "Город с таким названием не найден!"
-            self.bot.send_warning(user_id, warning_message)
-            self.request_city(user_id, request_message)
-        else:
-            return city_name, airport_code
+        city_name, airport_code = city_names_api.check_on_valid_city_name(
+            user_message
+        )
+        return city_name, airport_code
 
     def set_city(self, user_id, key_word, city_name, airport_code):
         """Записывает в БД название города и код аэропорта"""
@@ -148,41 +137,32 @@ class UserData(Period, City, Date):
             self.switch_user_status(user_id, "check_depart_city")
             self.request_city(user_id, message_for_depart)
 
-    def get_depart_city(self, user_id, user_message, key_word):
+    def get_city_name(self, user_id, user_message, key_word, request_message, status):
         """Проверяет полученное от юзера название города отправления в API.
         Если название найдено, то получет название города и международный
         код аэропорта, записывает их в бд, переключает статус юзера и
         просит ввести название города прибытия. Если название не найдено
         предупреждает и запрашивает повторно.
         """
-        # try:
-        city_name, airport_code = self.check_city(
-            user_id, user_message, message_for_depart
-        )
-        # except Exception as exc:
-        #     raise exc
-        # else:
-        self.set_city(user_id, key_word, city_name, airport_code)
-        self.switch_user_status(user_id, "check_arrive_city")
-        self.request_city(user_id, message_for_arrive)
-
-    def get_arrive_city(self, user_id, user_message, key_word):
-        """Проверяет полученное от юзера название города прибытия в API.
-        Если название найдено, то получет название города и международный
-        код аэропорта, записывает их в бд, переключает статус юзера  и
-        просит ввести дату отправления. Если название не найдено предупреждает
-        и запрашивает повторно.
-        """
-        # try:
-        city_name, airport_code = self.check_city(
-            user_id, user_message, message_for_arrive
-        )
-        # except:
-        #     return
-        # else:
-        self.set_city(user_id, key_word, city_name, airport_code)
-        self.switch_user_status(user_id, "check_date")
-        self.request_date(user_id)
+        try:
+            city_name, airport_code = self.check_city(
+                user_message
+            )
+        except exceptions.NotCriticalExeption as exc:
+            self.bot.send_warning(user_id, exc.args[0])
+            self.request_city(user_id, request_message)
+        except exceptions.CriticalExeption as exc:
+            self.bot.send_warning(user_id, exc.args[0])
+            raise exc
+            # logging
+            # return вместо raise
+        except exceptions.NotFoundException:
+            warning_message = "Город с таким названием не найден!"
+            self.bot.send_warning(user_id, warning_message)
+            self.request_city(user_id, request_message)
+        else:
+            self.set_city(user_id, key_word, city_name, airport_code)
+            self.switch_user_status(user_id, status)
 
     def get_depart_date(self, user_id, user_message):
         """Проверяет полученную от юзера дату/месяц на актуальность и
@@ -245,10 +225,14 @@ class UserData(Period, City, Date):
                             self.get_period(user_id, user_message)
                         elif user_status == "check_depart_city":
                             key_word = "depart_data"
-                            self.get_depart_city(user_id, user_message, key_word)
+                            next_status = "check_arrive_city"
+                            self.get_city_name(user_id, user_message, key_word, message_for_depart, next_status)
+                            self.request_city(user_id, message_for_arrive)
                         elif user_status == "check_arrive_city":
                             key_word = "arrive_data"
-                            self.get_arrive_city(user_id, user_message, key_word)
+                            next_status = "check_date"
+                            self.get_city_name(user_id, user_message, key_word, message_for_arrive, next_status)
+                            self.request_date(user_id)
                         elif user_status == "check_date":
                             self.get_depart_date(user_id, user_message)
                         elif user_status == "ready_for_proof":
