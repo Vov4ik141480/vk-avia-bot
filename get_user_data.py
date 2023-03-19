@@ -1,7 +1,6 @@
 # coding: utf - 8
 """Обработчик данных от пользователя на правильность вводимой информации"""
 import asyncio
-import sys
 
 from attr import attrs, attrib
 
@@ -13,8 +12,8 @@ from vk_utils import period_keyboard, prove_keyboard
 from bot_utils import BotSendMethod
 from template_messages import message_for_period, message_for_depart, message_for_arrive
 from conn_checker import get_connection_status
+from config import ALLOWED_PERIOD_FORMAT
 
-ALLOWED_PERIOD_FORMAT = ("на дату", "за месяц")
 
 @attrs
 class Objects:
