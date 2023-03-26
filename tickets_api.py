@@ -22,9 +22,6 @@ def check_request_to_api(api, url_params):
     url = get_url(api, *url_params)
     try:
         api_response = requests_handler(url)
-        api_response.raise_for_status()
-    except requests.exceptions.HTTPError:
-        raise NotCriticalExeption
     except requests.exceptions.Timeout:
         raise NotCriticalExeption
     except requests.exceptions.RequestException:
