@@ -1,6 +1,8 @@
 # coding: utf-8
 """Сервис по получению авиабилетов"""
 import asyncio
+import logging.config
+import traceback
 from datetime import datetime, timedelta
 from typing import NamedTuple
 
@@ -17,8 +19,11 @@ from template_messages import no_tickets_find, NON_CRITICAL_WARNING_MESSAGE, CRI
 from exceptions import CriticalExeption, NotCriticalExeption
 from bot_utils import BotSendMethod
 from conn_checker import get_connection_status
+from log import log_config
 
 
+logging.config.dictConfig(log_config)
+logger = logging.getLogger("main")
 class Message(NamedTuple):
     """Стркутура распаршенного сообщения о найденном билете"""
     departure_city: str
@@ -46,6 +51,24 @@ class FlightData:
         self.bot_ = BotSendMethod()
         self.tickets_queue = tickets_queue
 
+    def make_request_to_api(self, api, url_params):
+        while True:
+            try:
+                request_to_api_for_date = tickets_api.check_request_to_api(
+                    api, url_params
+                )
+            except NotCriticalExeption:
+                self.bot_.send_warning(self.user_id, NON_CRITICAL_WARNING_MESSAGE)
+                logger.info(traceback.format_exc(limit=2))
+                continue
+            except CriticalExeption:
+                self.bot_.send_warning(self.user_id, CRITICAL_WARNING_MESSAGE)
+                logger.error(traceback.format_exc(limit=2))
+                raise
+            else:
+                return request_to_api_for_date
+
+
     def make_request_to_api_for_date(self):
         """Возвращает список найденных билетов на текущую или
         будущую дату
@@ -57,32 +80,23 @@ class FlightData:
             self.departure_time,
             self.api_token,
         ]
+
         while True:
-            try:
-                request_to_api_for_date = tickets_api.check_request_to_api(
-                    api, url_params
-                )
-            except NotCriticalExeption:
-                self.bot_.send_warning(self.user_id, NON_CRITICAL_WARNING_MESSAGE)
-                continue
-            except CriticalExeption:
-                self.bot_.send_warning(self.user_id, CRITICAL_WARNING_MESSAGE)
-                raise
-            else:
-                if request_to_api_for_date.json()["data"]:
-                    try:
-                        departure_date = request_to_api_for_date.json()["data"][0][
-                            "departure_at"
-                        ]
-                        self.check_new_date(departure_date)
-                    except DateNotCorrect as exc:
-                        self.bot_.send_warning(self.user_id, exc.args[0])
-                        self.departure_time = exc.args[1]
-                        continue
-                    else:
-                        return self.api_response_handle(request_to_api_for_date)
+            request_to_api_for_date = self.make_request_to_api(api, url_params)
+            if request_to_api_for_date.json()["data"]:
+                try:
+                    departure_date = request_to_api_for_date.json()["data"][0][
+                        "departure_at"
+                    ]
+                    self.check_new_date(departure_date)
+                except DateNotCorrect as exc:
+                    self.bot_.send_warning(self.user_id, exc.args[0])
+                    self.departure_time = exc.args[1]
+                    continue
                 else:
-                    return no_tickets_find
+                    return self.api_response_handle(request_to_api_for_date)
+            else:
+                return no_tickets_find
 
     def make_requests_to_api_for_month(self):
         """Возвращает список найденных билетов на ближайшие даты месяца"""
@@ -95,21 +109,11 @@ class FlightData:
         ]
         self.departure_time = self.departure_time[0:7]
         while True:
-            try:
-                request_to_api_for_month = tickets_api.check_request_to_api(
-                    api, url_params
-                )
-            except NotCriticalExeption:
-                self.bot_.send_warning(self.user_id, NON_CRITICAL_WARNING_MESSAGE)
-                continue
-            except CriticalExeption:
-                self.bot_.send_warning(self.user_id, CRITICAL_WARNING_MESSAGE)
-                raise
+            request_to_api_for_month = self.make_request_to_api(api, url_params)
+            if request_to_api_for_month.json()["data"]:
+                return self.api_response_handle(request_to_api_for_month)
             else:
-                if request_to_api_for_month.json()["data"]:
-                    return self.api_response_handle(request_to_api_for_month)
-                else:
-                    return no_tickets_find
+                return no_tickets_find
 
     def get_depart_datetime(self, departure_at):
         """Возвращает дату/время вылета в формате ДД-ММ-ГГГГ ЧЧ:ММ"""
@@ -154,18 +158,9 @@ class FlightData:
         api = airports_timezone_api_url
         url_param = [airport_code.lower()]
         while True:
-            try:
-                request_to_api_for_timezone = tickets_api.check_request_to_api(
-                    api, url_param
-                )
-            except NotCriticalExeption:
-                self.bot_.send_warning(self.user_id, NON_CRITICAL_WARNING_MESSAGE)
-            except CriticalExeption:
-                self.bot_.send_warning(self.user_id, CRITICAL_WARNING_MESSAGE)
-                raise
-            else:
-                airport_timezone = request_to_api_for_timezone.json()["timezone"]
-                return airport_timezone
+            request_to_api_for_timezone = self.make_request_to_api(api, url_param)
+            airport_timezone = request_to_api_for_timezone.json()["timezone"]
+            return airport_timezone
 
     def api_response_handle(self, request_to_api):
         """Обрабатывет результат запроса к API и возвращает список из
