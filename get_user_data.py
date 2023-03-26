@@ -249,7 +249,7 @@ class UserData(Period, City, Date):
                     else:
                         self.start_searching(user_id, user_message)
             except Exception:
-                return
+                continue
 
 
 async def main(users_db, user_request_data, complite_user_data):
