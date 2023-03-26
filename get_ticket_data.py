@@ -13,7 +13,7 @@ from config import (
     AVIASALES_API_TOKEN,
 )
 from exceptions import CriticalExeption, NotCriticalExeption, DateNotCorrect
-from template_messages import no_tickets_find
+from template_messages import no_tickets_find, NON_CRITICAL_WARNING_MESSAGE, CRITICAL_WARNING_MESSAGE
 from exceptions import CriticalExeption, NotCriticalExeption
 from bot_utils import BotSendMethod
 from conn_checker import get_connection_status
@@ -62,11 +62,12 @@ class FlightData:
                 request_to_api_for_date = tickets_api.check_request_to_api(
                     api, url_params
                 )
-            except NotCriticalExeption as exc:
-                self.bot_.send_warning(self.user_id, exc.args[0])
+            except NotCriticalExeption:
+                self.bot_.send_warning(self.user_id, NON_CRITICAL_WARNING_MESSAGE)
                 continue
-            except CriticalExeption as exc:
-                raise exc
+            except CriticalExeption:
+                self.bot_.send_warning(self.user_id, CRITICAL_WARNING_MESSAGE)
+                raise
             else:
                 if request_to_api_for_date.json()["data"]:
                     try:
@@ -98,11 +99,12 @@ class FlightData:
                 request_to_api_for_month = tickets_api.check_request_to_api(
                     api, url_params
                 )
-            except NotCriticalExeption as exc:
-                self.bot_.send_warning(self.user_id, exc.args[0])
+            except NotCriticalExeption:
+                self.bot_.send_warning(self.user_id, NON_CRITICAL_WARNING_MESSAGE)
                 continue
-            except CriticalExeption as exc:
-                raise exc
+            except CriticalExeption:
+                self.bot_.send_warning(self.user_id, CRITICAL_WARNING_MESSAGE)
+                raise
             else:
                 if request_to_api_for_month.json()["data"]:
                     return self.api_response_handle(request_to_api_for_month)
@@ -156,11 +158,11 @@ class FlightData:
                 request_to_api_for_timezone = tickets_api.check_request_to_api(
                     api, url_param
                 )
-            except NotCriticalExeption as exc:
-                self.bot_.send_warning(self.user_id, exc.args[0])
-                continue
-            except CriticalExeption as exc:
-                raise exc
+            except NotCriticalExeption:
+                self.bot_.send_warning(self.user_id, NON_CRITICAL_WARNING_MESSAGE)
+            except CriticalExeption:
+                self.bot_.send_warning(self.user_id, CRITICAL_WARNING_MESSAGE)
+                raise
             else:
                 airport_timezone = request_to_api_for_timezone.json()["timezone"]
                 return airport_timezone
@@ -170,14 +172,14 @@ class FlightData:
         данных по билетам
         """
         current_destination_airport = request_to_api.json()["data"][0][
-            "destination_airport"
+            "destination"
         ]
         arrive_timezone = self.get_timezones(current_destination_airport)
 
         for ticket_data in request_to_api.json()["data"]:
             flight_duration = ticket_data["duration"]
             departure_date = ticket_data["departure_at"]
-            destination_airport = ticket_data["destination_airport"]
+            destination_airport = ticket_data["destination"]
             if destination_airport != current_destination_airport:
                 arrive_timezone = self.get_timezones(destination_airport)
                 current_destination_airport = destination_airport
@@ -224,8 +226,8 @@ async def process_job(complite_user_data, tickets_queue):
                 flight_data = FlightData(user_data, tickets_queue)
                 complite_user_data.task_done()
                 await asyncio.to_thread(flight_data.get_ticket_data_from_api)
-        except Exception as exc:
-            raise exc
+        except Exception:
+            continue
 
 async def main(complite_user_data, tickets_queue):
     await asyncio.gather(
