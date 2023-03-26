@@ -3,7 +3,7 @@ message_for_depart = "Город отправления?"
 message_for_arrive = "Город прибытия?"
 
 CRITICAL_WARNING_MESSAGE = "У нас что-то сломалось(\r\nМы работаем, чтобы это исправить! Позже, начните поиск сначала."
-NON_CRITICAL_WARNING_MESSAGE = "Упс! Не получилось проверить данные. Попробуйте еще раз."
+NON_CRITICAL_WARNING_MESSAGE = "Упс! Не получилось проверить данные. Делаю еще одну попытку ..."
 
 emojies_codes = {
     'finger_down': '&#128071;',
