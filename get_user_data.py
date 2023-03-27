@@ -158,6 +158,7 @@ class UserData(Period, City, Date):
             self.bot.send_warning(user_id, NON_CRITICAL_WARNING_MESSAGE)
             logger.info(traceback.format_exc(limit=2))
             self.request_city(user_id, request_message)
+            raise
         except exceptions.CriticalExeption:
             self.bot.send_warning(user_id, CRITICAL_WARNING_MESSAGE)
             logger.error(traceback.format_exc(limit=2))
