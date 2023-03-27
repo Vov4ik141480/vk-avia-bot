@@ -13,7 +13,7 @@ def get_url(api, *args):
 def requests_handler(url):
     """Шаблон URL для запроса к Aviasales API"""
     with requests.Session() as check_source:
-        request_to_api = check_source.get(url, params=None, headers=HEADERS, timeout=2.0)
+        request_to_api = check_source.get(url, params=None, headers=HEADERS, timeout=5.0)
         return request_to_api
 
 
