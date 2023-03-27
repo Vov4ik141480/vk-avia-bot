@@ -13,7 +13,7 @@ import exceptions
 from vk_utils import period_keyboard, prove_keyboard
 from bot_utils import BotSendMethod
 from template_messages import message_for_period, message_for_depart, message_for_arrive, \
-     CRITICAL_WARNING_MESSAGE, NON_CRITICAL_WARNING_MESSAGE
+     CRITICAL_WARNING_MESSAGE, WARNING_MESSAGE_API_CITIES
 from conn_checker import get_connection_status
 from config import ALLOWED_PERIOD_FORMAT
 from log import log_config
@@ -155,7 +155,7 @@ class UserData(Period, City, Date):
                 user_message
             )
         except exceptions.NotCriticalExeption:
-            self.bot.send_warning(user_id, NON_CRITICAL_WARNING_MESSAGE)
+            self.bot.send_warning(user_id, WARNING_MESSAGE_API_CITIES)
             logger.info(traceback.format_exc(limit=2))
             self.request_city(user_id, request_message)
             raise
