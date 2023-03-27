@@ -15,7 +15,7 @@ from config import (
     AVIASALES_API_TOKEN,
 )
 from exceptions import CriticalExeption, NotCriticalExeption, DateNotCorrect
-from template_messages import no_tickets_find, NON_CRITICAL_WARNING_MESSAGE, CRITICAL_WARNING_MESSAGE
+from template_messages import no_tickets_find, CRITICAL_WARNING_MESSAGE, WARNING_MESSAGE_API_TICKETS
 from exceptions import CriticalExeption, NotCriticalExeption
 from bot_utils import BotSendMethod
 from conn_checker import get_connection_status
@@ -58,7 +58,7 @@ class FlightData:
                     api, url_params
                 )
             except NotCriticalExeption:
-                self.bot_.send_warning(self.user_id, NON_CRITICAL_WARNING_MESSAGE)
+                self.bot_.send_warning(self.user_id, WARNING_MESSAGE_API_TICKETS)
                 logger.info(traceback.format_exc(limit=2))
                 continue
             except CriticalExeption:
