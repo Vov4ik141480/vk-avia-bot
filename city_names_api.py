@@ -10,7 +10,7 @@ def requests_handler(url):
     полученные данные
     """
     with requests.Session() as check_source:
-        response = check_source.get(url, headers=HEADERS, params=None, timeout=2.0)
+        response = check_source.get(url, headers=HEADERS, params=None, timeout=5.0)
         return response
 
 
