@@ -15,9 +15,8 @@ The chatbot gets ticket insights and flight price from the Aviasales Data API.
 > - Rename the .env.example file into .env and modify it according to the ids and tokens recieved.
 
 ### Requirements
-> language version...
->
-> dependecies...
+> Python 3.9
+> requirements.txt
 
 ## Roadmap
 > добавить выбор языка (EN/RU)
