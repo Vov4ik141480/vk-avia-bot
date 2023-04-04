@@ -21,6 +21,9 @@ def check_on_valid_city_name(city_name):
     url = city_autocomplite_api_url.format(city_name)
     try:
         api_response = requests_handler(url)
+        api_response.raise_for_status()
+    except requests.exceptions.HTTPError:
+        raise NotCriticalExeption
     except requests.exceptions.Timeout:
         raise NotCriticalExeption
     except requests.exceptions.RequestException:
