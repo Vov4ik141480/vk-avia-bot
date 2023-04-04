@@ -167,6 +167,7 @@ class UserData(Period, City, Date):
             warning_message = "Город с таким названием не найден!"
             self.bot.send_warning(user_id, warning_message)
             self.request_city(user_id, request_message)
+            raise
         else:
             self.set_city(user_id, key_word, city_name, airport_code)
             self.switch_user_status(user_id, status)
