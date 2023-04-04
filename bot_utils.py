@@ -1,12 +1,13 @@
 # coding: utf-8
 from vk_utils import start_keyboard
 from vk_methods import VkMethods
-from template_messages import welcome_text, wrong_data, hint_to_begin
+from template_messages import welcome_text, help_text, wrong_data, hint_to_begin
 
 
 class BotSendMethod:
     def __init__(self):
         self.welcome_message = welcome_text
+        self.help_message = help_text
         self.wrong_message = wrong_data
         self.hint_for_begin = hint_to_begin
 
@@ -14,6 +15,10 @@ class BotSendMethod:
         """Отправляет юзеру информацию как взаимодействовать с ботом"""
         keyboard = start_keyboard.get_keyboard()
         VkMethods().send_message(user_id, self.welcome_message, keyboard)
+
+    def send_help(self, user_id):
+        """Отправляет юзеру информацию как работает бот"""
+        VkMethods().send_message(user_id, self.help_message, keyboard=None)        
 
     def send_hint(self, user_id):
         """Отправляет юзеру подсказку как начать поиск"""

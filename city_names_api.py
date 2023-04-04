@@ -3,7 +3,6 @@ import requests
 
 from config import city_autocomplite_api_url, HEADERS
 from exceptions import CriticalExeption, NotCriticalExeption, NotFoundException
-from template_messages import CRITICAL_WARNING_MESSAGE, NON_CRITICAL_WARNING_MESSAGE
 
 
 def requests_handler(url):
@@ -11,17 +10,8 @@ def requests_handler(url):
     полученные данные
     """
     with requests.Session() as check_source:
-        try:
-            response = check_source.get(url, headers=HEADERS, params=None, timeout=1.0)
-            response.raise_for_status()
-        except requests.exceptions.HTTPError:
-            return "not_critical_error"
-        except requests.exceptions.Timeout:
-            return "not_critical_error"
-        except requests.exceptions.RequestException:
-            return "critical_error"
-        else:
-            return response
+        response = check_source.get(url, headers=HEADERS, params=None, timeout=5.0)
+        return response
 
 
 def check_on_valid_city_name(city_name):
@@ -29,11 +19,12 @@ def check_on_valid_city_name(city_name):
     и возвращает данные (название города и код аэропорта)
     """
     url = city_autocomplite_api_url.format(city_name)
-    api_response = requests_handler(url)
-    if api_response == "critical_error":
-        raise CriticalExeption(CRITICAL_WARNING_MESSAGE)
-    if api_response == "not_critical_error":
-        raise NotCriticalExeption(NON_CRITICAL_WARNING_MESSAGE)
+    try:
+        api_response = requests_handler(url)
+    except requests.exceptions.Timeout:
+        raise NotCriticalExeption
+    except requests.exceptions.RequestException:
+        raise CriticalExeption
     else:
         city_name_matches = api_response.json()
         if city_name_matches:

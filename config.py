@@ -16,6 +16,8 @@ VK_BOT_TOKEN = os.getenv("VK_BOT_TOKEN", "")
 
 AVIASALES_API_TOKEN = os.getenv("AVIASALES_API_TOKEN")
 
+ALLOWED_PERIOD_FORMAT = ("на дату", "за месяц")
+
 # URL для API автокомплита для стран, городов и аэропортов (IATA)
 city_autocomplite_api_url = 'https://autocomplete.travelpayouts.com/places2?term={}&locale=ru&types[]=city'
 
