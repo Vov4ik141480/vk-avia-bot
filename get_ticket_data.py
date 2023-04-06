@@ -51,10 +51,13 @@ class FlightData:
         self.bot_ = BotSendMethod()
         self.tickets_queue = tickets_queue
 
-    def make_request_to_api(self, api, url_params):
+    def get_api_data(self, api, url_params):
+        """Инициирует получение данных по билетам из API, если
+        Timeout error, инициирует повторно.
+        """
         while True:
             try:
-                request_to_api_for_date = tickets_api.check_request_to_api(
+                api_response = tickets_api.check_request_to_api(
                     api, url_params
                 )
             except NotCriticalExeption:
@@ -66,10 +69,10 @@ class FlightData:
                 logger.error(traceback.format_exc(limit=2))
                 raise
             else:
-                return request_to_api_for_date
+                return api_response
 
 
-    def make_request_to_api_for_date(self):
+    def make_request_to_api(self):
         """Возвращает список найденных билетов на текущую или
         будущую дату
         """
@@ -81,39 +84,36 @@ class FlightData:
             self.api_token,
         ]
 
-        while True:
-            request_to_api_for_date = self.make_request_to_api(api, url_params)
-            if request_to_api_for_date.json()["data"]:
-                try:
-                    departure_date = request_to_api_for_date.json()["data"][0][
-                        "departure_at"
-                    ]
-                    self.check_new_date(departure_date)
-                except DateNotCorrect as exc:
-                    self.bot_.send_warning(self.user_id, exc.args[0])
-                    self.departure_time = exc.args[1]
-                    continue
-                else:
-                    return self.api_response_handle(request_to_api_for_date)
+        api_ticket_data = self.get_api_data(api, url_params)
+        if api_ticket_data.json()["data"]:
+            if len(api_ticket_data.json()["data"]) == 1: # запрос на дату
+                return self.get_ticket_on_day(api_ticket_data)
             else:
-                return no_tickets_find
+                return self.get_ticket_on_month(api_ticket_data)
+        else:
+            return no_tickets_find
+        
 
-    def make_requests_to_api_for_month(self):
-        """Возвращает список найденных билетов на ближайшие даты месяца"""
-        api = aviasales_data_api_url
-        url_params = [
-            self.depart_city_code,
-            self.arrive_citi_code,
-            self.departure_time,
-            self.api_token,
-        ]
-        self.departure_time = self.departure_time[0:7]
-        while True:
-            request_to_api_for_month = self.make_request_to_api(api, url_params)
-            if request_to_api_for_month.json()["data"]:
-                return self.api_response_handle(request_to_api_for_month)
-            else:
-                return no_tickets_find
+    def get_ticket_on_day(self, api_data):
+        """Возвращает список найденных билетов на дату.
+        Если билет текущей датой и время вылета прошло или
+        до вылета осталось менее часа, то дата вылета становится
+        Т+1 и отправляется новый запрос к API."""
+        try:
+            departure_date = api_data.json()["data"][0]["departure_at"]
+            self.check_new_date(departure_date)
+        except DateNotCorrect as exc:
+            self.bot_.send_warning(self.user_id, exc.args[0])
+            self.departure_time = exc.args[1]
+            self.make_request_to_api()
+        else:
+            return self.api_response_handle(api_data)
+
+
+    def get_ticket_on_month(self, api_data):
+        """Возвращает список найденных билетов  за месяц."""
+        return self.api_response_handle(api_data)
+
 
     def get_depart_datetime(self, departure_at):
         """Возвращает дату/время вылета в формате ДД-ММ-ГГГГ ЧЧ:ММ"""
@@ -158,7 +158,7 @@ class FlightData:
         api = airports_timezone_api_url
         url_param = [airport_code.lower()]
         while True:
-            request_to_api_for_timezone = self.make_request_to_api(api, url_param)
+            request_to_api_for_timezone = self.get_api_data(api, url_param)
             airport_timezone = request_to_api_for_timezone.json()["timezone"]
             return airport_timezone
 
@@ -200,14 +200,15 @@ class FlightData:
 
     def get_ticket_data_from_api(self):
         """Делает запрос к API, полученные данные ставит в очередь билетов"""
-        if self.user_data["period"] == "на дату":
-            date_api_response = self.make_request_to_api_for_date()
-            self.tickets_portfolio = []
-            self.tickets_queue.appendleft([self.user_id, date_api_response])
+        if self.user_data["period"] != "на дату":
+            self.departure_time = self.departure_time[0:7]    
+        try:
+            tickets_data = self.make_request_to_api()
+        except Exception: 
+            return
         else:
-            month_api_response = self.make_requests_to_api_for_month()
             self.tickets_portfolio = []
-            self.tickets_queue.appendleft([self.user_id, month_api_response])
+            self.tickets_queue.appendleft([self.user_id, tickets_data])
 
 
 async def process_job(complite_user_data, tickets_queue):
@@ -215,14 +216,12 @@ async def process_job(complite_user_data, tickets_queue):
     и в отдельном потоке запускает запрос к API
     """
     while await get_connection_status():
-        try:
-            if not complite_user_data.empty():
-                user_data = await complite_user_data.get()
-                flight_data = FlightData(user_data, tickets_queue)
-                complite_user_data.task_done()
-                await asyncio.to_thread(flight_data.get_ticket_data_from_api)
-        except Exception:
-            continue
+        if not complite_user_data.empty():
+            user_data = await complite_user_data.get()
+            flight_data = FlightData(user_data, tickets_queue)
+            complite_user_data.task_done()
+            await asyncio.to_thread(flight_data.get_ticket_data_from_api)
+
 
 async def main(complite_user_data, tickets_queue):
     await asyncio.gather(
