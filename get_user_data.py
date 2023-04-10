@@ -22,6 +22,7 @@ from template_messages import (
 from conn_checker import get_connection_status
 from config import ALLOWED_PERIOD_FORMAT
 from users import insert_user
+from tickets import insert_ticket
 from log import log_config
 
 
@@ -212,6 +213,7 @@ class UserData(Period, City, Date):
                 user_id, complit_data
             )
             self.complite_user_data_queue.put_nowait(formatted_data)
+            insert_ticket(formatted_data)
         else:
             self.request_period(user_id, message_for_period)
             self.switch_user_status(user_id, "check_period")
