@@ -15,6 +15,6 @@ def insert_user(uid):
             user_data["mobile_phone"],
         )
         execute(
-            "INSERT INTO TABLE user (uid, first_name, last_name, mobile_phone) VALUES (:uid, :first_name, :last_name, :mobile_phone)",
+            "INSERT INTO TABLE user (uid, first_name, last_name, mobile_phone) VALUES (?, ?, ?, ?)",
             personal_data,
         )
