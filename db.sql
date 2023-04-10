@@ -3,12 +3,7 @@ create table user (
   uid integer,
   first_name varchar(50),
   last_name varchar(50),
-  bdate varchar(20),
-  city varchar(50),
-  contacts varchar(20),
-  country varchar(20),
-  domain varchar(50,
-  sex varchar(20)
+  mobile_phone varchar(20),
 );
 
 create table ticket (
