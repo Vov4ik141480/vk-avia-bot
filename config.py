@@ -22,7 +22,7 @@ ALLOWED_PERIOD_FORMAT = ("на дату", "за месяц")
 BASE_DIR = Path(__file__).resolve().parent
 SQLITE_DB_FILE = BASE_DIR / "db.sqlite3"
 
-API_USERS_GET_URL = "https://api.vk.com/method/users.get?user_ids={}&fields=city,contacts,country&access_token={}}&v=5.131"
+API_USERS_GET_URL = "https://api.vk.com/method/users.get?user_ids={}&fields=city,contacts,country&access_token={}&v=5.131"
 
 # URL для API автокомплита для стран, городов и аэропортов (IATA)
 city_autocomplite_api_url = (
