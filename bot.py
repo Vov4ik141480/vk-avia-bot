@@ -9,6 +9,7 @@ import get_user_data
 import get_ticket_data
 import send_result
 from worker import Worker
+from db import close_db
 from vk_longpoll import VkServer
 from log import log_config
 
@@ -69,6 +70,8 @@ def main():
         bot.start()
     except Exception:
         log_bot.error(traceback.format_exc(limit=2))
+    finally:
+        close_db()
 
 
 if __name__ == "__main__":
