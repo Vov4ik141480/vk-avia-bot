@@ -127,8 +127,8 @@ class UserData(Period, City, Date):
         """
         if user_message == "start":
             self.bot.send_welcome(user_id)
-        elif user_message == "начать поиск":
             insert_user(user_id)
+        elif user_message == "начать поиск":
             self.request_period(user_id, message_for_period)
             self.switch_user_status(user_id, "check_period")
         elif user_message == "help":
