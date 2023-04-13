@@ -1,7 +1,13 @@
 import sqlite3
+import logging.config
+import traceback
 
 import config
+from log import log_config
 
+
+logging.config.dictConfig(log_config)
+logger = logging.getLogger("main")
 
 def get_db():
     con = sqlite3.Connection(config.SQLITE_DB_FILE)
@@ -9,10 +15,14 @@ def get_db():
 
 
 def execute(sql, params):
-    db = get_db()
-    cur = db.cursor()
-    cur.execute(sql, params)
-    db.commit()
+    try:
+        db = get_db()
+        with db:
+            db.execute(sql, params)
+    except sqlite3.Error:
+        logger.error(traceback.format_exc(limit=2))
+    finally:
+        close_db()
 
 
 def close_db():
