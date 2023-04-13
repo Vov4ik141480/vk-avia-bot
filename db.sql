@@ -12,5 +12,6 @@ create table ticket (
   destination_city varchar(255),
   depart_date varchar(255),
   user_id integer,
+  search_date text,
   foreign key (user_id) references user(id)
 );
