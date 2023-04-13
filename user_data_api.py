@@ -22,4 +22,4 @@ def get_user(uid):
             raise CriticalExeption
         else:
             api_response = api_response.json()
-            return api_response
+            return api_response["response"][0]
