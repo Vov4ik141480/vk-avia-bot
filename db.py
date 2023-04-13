@@ -11,8 +11,7 @@ def get_db():
 def execute(sql, params):
     db = get_db()
     cur = db.cursor()
-    args = (sql, params)
-    cur.execute(*args)
+    cur.execute(sql, params)
     db.commit()
 
 
