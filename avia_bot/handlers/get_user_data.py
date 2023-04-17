@@ -6,24 +6,24 @@ import traceback
 
 from attr import attrs, attrib
 
-import city_names_api
-import date_format_checker
-import selection_confirmation
-import exceptions
-from vk_utils import period_keyboard, prove_keyboard
-from bot_utils import BotSendMethod
-from template_messages import (
+import avia_bot.services.city_names_api as city_names_api
+import avia_bot.handlers.date_format_checker as date_format_checker
+import avia_bot.handlers.selection_confirmation as selection_confirmation
+import avia_bot.handlers.exceptions as exceptions
+from avia_bot.handlers.vk_utils import period_keyboard, prove_keyboard
+from avia_bot.handlers.bot_utils import BotSendMethod
+from avia_bot.templates.template_messages import (
     message_for_period,
     message_for_depart,
     message_for_arrive,
     CRITICAL_WARNING_MESSAGE,
     WARNING_MESSAGE_API_CITIES,
 )
-from conn_checker import get_connection_status
-from config import ALLOWED_PERIOD_FORMAT
-from users import insert_user
-from tickets import insert_ticket
-from log import log_config
+from avia_bot.handlers.conn_checker import get_connection_status
+from avia_bot.config import ALLOWED_PERIOD_FORMAT
+from avia_bot.services.users import insert_user
+from avia_bot.services.tickets import insert_ticket
+from avia_bot.log import log_config
 
 
 logging.config.dictConfig(log_config)

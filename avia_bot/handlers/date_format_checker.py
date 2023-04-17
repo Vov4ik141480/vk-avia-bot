@@ -2,7 +2,7 @@
 import time
 from datetime import datetime
 
-from exceptions import WrongDateFormat, DateNotCorrect
+from avia_bot.handlers.exceptions import WrongDateFormat, DateNotCorrect
 
 
 def get_date(user_date):

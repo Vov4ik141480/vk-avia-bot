@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from db import execute
+from avia_bot.db import execute
 
 
 def insert_ticket(user_request):

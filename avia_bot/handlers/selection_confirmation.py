@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from template_messages import result_message
+from avia_bot.templates.template_messages import result_message
 
 
 def get_check_message(depart_city, arrive_city, user_date):

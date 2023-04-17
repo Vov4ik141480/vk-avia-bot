@@ -2,8 +2,8 @@ import sqlite3
 import logging.config
 import traceback
 
-import config
-from log import log_config
+import avia_bot.config as config
+from avia_bot.log import log_config
 
 
 logging.config.dictConfig(log_config)

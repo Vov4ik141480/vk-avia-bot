@@ -1,10 +1,10 @@
 import asyncio
 from datetime import datetime
 
-from template_messages import ticket_data
-from keyboards import keyboard_get_link
-from bot_utils import BotSendMethod
-from conn_checker import get_connection_status
+from avia_bot.templates.template_messages import ticket_data
+from avia_bot.handlers.keyboards import keyboard_get_link
+from avia_bot.handlers.bot_utils import BotSendMethod
+from avia_bot.handlers.conn_checker import get_connection_status
 
 
 async def get_data(tickets_queue):
