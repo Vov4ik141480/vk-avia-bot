@@ -1,4 +1,4 @@
-from user_data_api import get_user
+from avia_bot.services.user_data_api import get_user
 from db import execute
 
 

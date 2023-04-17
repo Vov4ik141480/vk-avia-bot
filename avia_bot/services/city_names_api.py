@@ -2,7 +2,7 @@
 import requests
 
 from config import city_autocomplite_api_url, HEADERS
-from exceptions import CriticalExeption, NotCriticalExeption, NotFoundException
+from avia_bot.handlers.exceptions import CriticalExeption, NotCriticalExeption, NotFoundException
 
 
 def requests_handler(url):

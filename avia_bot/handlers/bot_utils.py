@@ -1,7 +1,7 @@
 # coding: utf-8
-from vk_utils import start_keyboard
-from vk_methods import VkMethods
-from template_messages import welcome_text, help_text, wrong_data, hint_to_begin
+from avia_bot.handlers.vk_utils import start_keyboard
+from avia_bot.handlers.vk_methods import VkMethods
+from avia_bot.templates.template_messages import welcome_text, help_text, wrong_data, hint_to_begin
 
 
 class BotSendMethod:

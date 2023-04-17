@@ -8,17 +8,17 @@ from typing import NamedTuple
 
 import arrow
 
-import tickets_api
+import avia_bot.services.tickets_api as tickets_api
 from config import (
     aviasales_data_api_url,
     airports_timezone_api_url,
     AVIASALES_API_TOKEN,
 )
-from exceptions import CriticalExeption, NotCriticalExeption, DateNotCorrect
-from template_messages import no_tickets_find, CRITICAL_WARNING_MESSAGE, WARNING_MESSAGE_API_TICKETS
-from exceptions import CriticalExeption, NotCriticalExeption
-from bot_utils import BotSendMethod
-from conn_checker import get_connection_status
+from avia_bot.handlers.exceptions import CriticalExeption, NotCriticalExeption, DateNotCorrect
+from avia_bot.templates.template_messages import no_tickets_find, CRITICAL_WARNING_MESSAGE, WARNING_MESSAGE_API_TICKETS
+from avia_bot.handlers.exceptions import CriticalExeption, NotCriticalExeption
+from avia_bot.handlers.bot_utils import BotSendMethod
+from avia_bot.handlers.conn_checker import get_connection_status
 from log import log_config
 
 

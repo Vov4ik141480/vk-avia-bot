@@ -1,7 +1,7 @@
 import requests
 
 from config import HEADERS
-from exceptions import CriticalExeption, NotCriticalExeption
+from avia_bot.handlers.exceptions import CriticalExeption, NotCriticalExeption
 
 
 def get_url(api, *args):

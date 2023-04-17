@@ -1,7 +1,7 @@
 import requests
 
 from config import API_USERS_GET_URL, VK_BOT_TOKEN, HEADERS
-from exceptions import CriticalExeption, NotCriticalExeption
+from avia_bot.handlers.exceptions import CriticalExeption, NotCriticalExeption
 
 
 def get_user(uid):

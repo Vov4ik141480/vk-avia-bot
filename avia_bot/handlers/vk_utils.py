@@ -1,5 +1,5 @@
 # encode: utf-8
-import keyboards
+import avia_bot.handlers.keyboards as keyboards
 
 
 start_keyboard = keyboards.make_keyboards()
