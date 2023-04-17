@@ -10,3 +10,6 @@ db.sqlite3
 .python-version
 .env
 *.log
+
+# ignore the default SQLite database
+*.sqlite3

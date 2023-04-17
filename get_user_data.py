@@ -12,15 +12,23 @@ import selection_confirmation
 import exceptions
 from vk_utils import period_keyboard, prove_keyboard
 from bot_utils import BotSendMethod
-from template_messages import message_for_period, message_for_depart, message_for_arrive, \
-     CRITICAL_WARNING_MESSAGE, WARNING_MESSAGE_API_CITIES
+from template_messages import (
+    message_for_period,
+    message_for_depart,
+    message_for_arrive,
+    CRITICAL_WARNING_MESSAGE,
+    WARNING_MESSAGE_API_CITIES,
+)
 from conn_checker import get_connection_status
 from config import ALLOWED_PERIOD_FORMAT
+from users import insert_user
+from tickets import insert_ticket
 from log import log_config
 
 
 logging.config.dictConfig(log_config)
 logger = logging.getLogger("main")
+
 
 @attrs
 class Objects:
@@ -28,6 +36,7 @@ class Objects:
     users_db = attrib()
     user_data_queue = attrib()
     complite_user_data_queue = attrib()
+
 
 @attrs
 class Period(Objects):
@@ -45,6 +54,7 @@ class Period(Objects):
         """Записывает в БД период"""
         self.users_db[user_id]["period"] = user_message
 
+
 @attrs
 class City(Objects):
     def request_city(self, user_id, request_message):
@@ -55,15 +65,14 @@ class City(Objects):
 
     def check_city(self, user_message):
         """Возвращает ответ от api проверки названия города"""
-        city_name, airport_code = city_names_api.check_on_valid_city_name(
-            user_message
-        )
+        city_name, airport_code = city_names_api.check_on_valid_city_name(user_message)
         return city_name, airport_code
 
     def set_city(self, user_id, key_word, city_name, airport_code):
         """Записывает в БД название города и код аэропорта"""
         flight_point_data = key_word
         self.users_db[user_id][flight_point_data] = [city_name, airport_code]
+
 
 @attrs
 class Date(Objects):
@@ -118,6 +127,7 @@ class UserData(Period, City, Date):
         """
         if user_message == "start":
             self.bot.send_welcome(user_id)
+            insert_user(user_id)
         elif user_message == "начать поиск":
             self.request_period(user_id, message_for_period)
             self.switch_user_status(user_id, "check_period")
@@ -151,9 +161,7 @@ class UserData(Period, City, Date):
         предупреждает и запрашивает повторно.
         """
         try:
-            city_name, airport_code = self.check_city(
-                user_message
-            )
+            city_name, airport_code = self.check_city(user_message)
         except exceptions.NotCriticalExeption:
             self.bot.send_warning(user_id, WARNING_MESSAGE_API_CITIES)
             logger.info(traceback.format_exc(limit=2))
@@ -162,7 +170,7 @@ class UserData(Period, City, Date):
         except exceptions.CriticalExeption:
             self.bot.send_warning(user_id, CRITICAL_WARNING_MESSAGE)
             logger.error(traceback.format_exc(limit=2))
-            raise 
+            raise
         except exceptions.NotFoundException:
             warning_message = "Город с таким названием не найден!"
             self.bot.send_warning(user_id, warning_message)
@@ -205,10 +213,10 @@ class UserData(Period, City, Date):
                 user_id, complit_data
             )
             self.complite_user_data_queue.put_nowait(formatted_data)
+            insert_ticket(formatted_data)
         else:
             self.request_period(user_id, message_for_period)
             self.switch_user_status(user_id, "check_period")
-
 
     async def data_handler(self):
         """Запоминает статус для каждого юзера, распределяет данные для
@@ -234,12 +242,24 @@ class UserData(Period, City, Date):
                         elif user_status == "check_depart_city":
                             key_word = "depart_data"
                             next_status = "check_arrive_city"
-                            self.get_city_name(user_id, user_message, key_word, message_for_depart, next_status)
+                            self.get_city_name(
+                                user_id,
+                                user_message,
+                                key_word,
+                                message_for_depart,
+                                next_status,
+                            )
                             self.request_city(user_id, message_for_arrive)
                         elif user_status == "check_arrive_city":
                             key_word = "arrive_data"
                             next_status = "check_date"
-                            self.get_city_name(user_id, user_message, key_word, message_for_arrive, next_status)
+                            self.get_city_name(
+                                user_id,
+                                user_message,
+                                key_word,
+                                message_for_arrive,
+                                next_status,
+                            )
                             self.request_date(user_id)
                         elif user_status == "check_date":
                             self.get_depart_date(user_id, user_message)
@@ -255,9 +275,7 @@ class UserData(Period, City, Date):
 
 
 async def main(users_db, user_request_data, complite_user_data):
-    user_data = UserData(
-        users_db, user_request_data, complite_user_data
-    )
+    user_data = UserData(users_db, user_request_data, complite_user_data)
     await asyncio.gather(
         asyncio.create_task(user_data.data_handler()),
         asyncio.create_task(user_data.data_handler()),
@@ -266,6 +284,4 @@ async def main(users_db, user_request_data, complite_user_data):
 
 
 def start(users_db, user_request_data, complite_user_data):
-    asyncio.run(
-        main(users_db, user_request_data, complite_user_data)
-    )
+    asyncio.run(main(users_db, user_request_data, complite_user_data))
