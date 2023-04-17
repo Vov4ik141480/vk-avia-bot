@@ -1,6 +1,6 @@
 import requests
 
-from config import HEADERS
+from avia_bot.config import HEADERS
 from avia_bot.handlers.exceptions import CriticalExeption, NotCriticalExeption
 
 

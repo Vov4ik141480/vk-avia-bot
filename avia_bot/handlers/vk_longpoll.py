@@ -4,7 +4,7 @@ import asyncio
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
-from config import VK_BOT_TOKEN, VK_AVIA_BOT_GROUP_ID
+from avia_bot.config import VK_BOT_TOKEN, VK_AVIA_BOT_GROUP_ID
 
 
 class VkServer:

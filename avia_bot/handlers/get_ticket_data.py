@@ -9,7 +9,7 @@ from typing import NamedTuple
 import arrow
 
 import avia_bot.services.tickets_api as tickets_api
-from config import (
+from avia_bot.config import (
     aviasales_data_api_url,
     airports_timezone_api_url,
     AVIASALES_API_TOKEN,
@@ -19,7 +19,7 @@ from avia_bot.templates.template_messages import no_tickets_find, CRITICAL_WARNI
 from avia_bot.handlers.exceptions import CriticalExeption, NotCriticalExeption
 from avia_bot.handlers.bot_utils import BotSendMethod
 from avia_bot.handlers.conn_checker import get_connection_status
-from log import log_config
+from avia_bot.log import log_config
 
 
 logging.config.dictConfig(log_config)
