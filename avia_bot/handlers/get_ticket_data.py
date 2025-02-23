@@ -14,8 +14,16 @@ from avia_bot.config import (
     airports_timezone_api_url,
     AVIASALES_API_TOKEN,
 )
-from avia_bot.handlers.exceptions import CriticalExeption, NotCriticalExeption, DateNotCorrect
-from avia_bot.templates.template_messages import no_tickets_find, CRITICAL_WARNING_MESSAGE, WARNING_MESSAGE_API_TICKETS
+from avia_bot.handlers.exceptions import (
+    CriticalExeption,
+    NotCriticalExeption,
+    DateNotCorrect,
+)
+from avia_bot.templates.template_messages import (
+    no_tickets_find,
+    CRITICAL_WARNING_MESSAGE,
+    WARNING_MESSAGE_API_TICKETS,
+)
 from avia_bot.handlers.exceptions import CriticalExeption, NotCriticalExeption
 from avia_bot.handlers.bot_utils import BotSendMethod
 from avia_bot.handlers.conn_checker import get_connection_status
@@ -24,6 +32,8 @@ from avia_bot.log import log_config
 
 logging.config.dictConfig(log_config)
 logger = logging.getLogger("main")
+
+
 class Message(NamedTuple):
     """Стркутура распаршенного сообщения о найденном билете"""
     departure_city: str
@@ -57,9 +67,7 @@ class FlightData:
         """
         while True:
             try:
-                api_response = tickets_api.check_request_to_api(
-                    api, url_params
-                )
+                api_response = tickets_api.check_request_to_api(api, url_params)
             except NotCriticalExeption:
                 self.bot_.send_warning(self.user_id, WARNING_MESSAGE_API_TICKETS)
                 logger.info(traceback.format_exc(limit=2))
@@ -70,7 +78,6 @@ class FlightData:
                 raise
             else:
                 return api_response
-
 
     def make_request_to_api(self):
         """Возвращает список найденных билетов на текущую или
@@ -83,16 +90,14 @@ class FlightData:
             self.departure_time,
             self.api_token,
         ]
-
         api_ticket_data = self.get_api_data(api, url_params)
         if api_ticket_data.json()["data"]:
-            if len(api_ticket_data.json()["data"]) == 1: # запрос на дату
+            if len(api_ticket_data.json()["data"]) == 1:
                 return self.get_ticket_on_day(api_ticket_data)
             else:
                 return self.get_ticket_on_month(api_ticket_data)
         else:
             return no_tickets_find
-        
 
     def get_ticket_on_day(self, api_data):
         """Возвращает список найденных билетов на дату.
@@ -109,11 +114,9 @@ class FlightData:
         else:
             return self.api_response_handle(api_data)
 
-
     def get_ticket_on_month(self, api_data):
         """Возвращает список найденных билетов  за месяц."""
         return self.api_response_handle(api_data)
-
 
     def get_depart_datetime(self, departure_at):
         """Возвращает дату/время вылета в формате ДД-ММ-ГГГГ ЧЧ:ММ"""
@@ -166,9 +169,7 @@ class FlightData:
         """Обрабатывет результат запроса к API и возвращает список из
         данных по билетам
         """
-        current_destination_airport = request_to_api.json()["data"][0][
-            "destination"
-        ]
+        current_destination_airport = request_to_api.json()["data"][0]["destination"]
         arrive_timezone = self.get_timezones(current_destination_airport)
 
         for ticket_data in request_to_api.json()["data"]:
@@ -183,7 +184,6 @@ class FlightData:
                 departure_date, arrive_timezone, flight_duration
             )
             transfer_data = self.get_transfer_data(ticket_data["transfers"])
-
             ticket = Message(
                 departure_city=self.departure_city_name,
                 arrival_city=self.arrival_city_name,
@@ -201,10 +201,10 @@ class FlightData:
     def get_ticket_data_from_api(self):
         """Делает запрос к API, полученные данные ставит в очередь билетов"""
         if self.user_data["period"] != "на дату":
-            self.departure_time = self.departure_time[0:7]    
+            self.departure_time = self.departure_time[0:7]
         try:
             tickets_data = self.make_request_to_api()
-        except Exception: 
+        except Exception:
             return
         else:
             self.tickets_portfolio = []
