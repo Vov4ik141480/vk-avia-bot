@@ -10,7 +10,7 @@ from avia_bot.handlers.conn_checker import get_connection_status
 async def get_data(tickets_queue):
     """Отправляет пользователю найденные билеты или оповещает, что по направлению
     билеты не найдены"""
-    while await get_connection_status():    
+    while await get_connection_status():
         if tickets_queue:
             ticket_data_set = tickets_queue.pop()
             await asyncio.to_thread(send_result, ticket_data_set)
