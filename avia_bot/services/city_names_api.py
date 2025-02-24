@@ -1,7 +1,7 @@
 # coding: utf-8
 import requests
 
-from avia_bot.config import city_autocomplite_api_url, HEADERS
+from avia_bot.configs.config import city_autocomplite_api_url, HEADERS
 from avia_bot.handlers.exceptions import CriticalExeption, NotCriticalExeption, NotFoundException
 
 
