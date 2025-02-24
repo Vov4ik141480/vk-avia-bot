@@ -20,10 +20,10 @@ from avia_bot.templates.template_messages import (
     WARNING_MESSAGE_API_CITIES,
 )
 from avia_bot.handlers.conn_checker import get_connection_status
-from avia_bot.config import ALLOWED_PERIOD_FORMAT
+from avia_bot.configs.config import ALLOWED_PERIOD_FORMAT
 from avia_bot.services.users import insert_user
 from avia_bot.services.tickets import insert_ticket
-from avia_bot.log import log_config
+from avia_bot.handlers.log import log_config
 
 
 logging.config.dictConfig(log_config)
@@ -125,9 +125,9 @@ class UserData(Period, City, Date):
         инициализирует новый поиск, отправляет info о боте,
         отправляет подсказку.
         """
+        insert_user(user_id)
         if user_message == "start":
             self.bot.send_welcome(user_id)
-            insert_user(user_id)
         elif user_message == "начать поиск":
             self.request_period(user_id, message_for_period)
             self.switch_user_status(user_id, "check_period")
