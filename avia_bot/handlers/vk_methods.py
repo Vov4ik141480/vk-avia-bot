@@ -2,7 +2,7 @@
 import vk_api
 from vk_api.utils import get_random_id
 
-from avia_bot.config import VK_BOT_TOKEN
+from avia_bot.configs.config import VK_BOT_TOKEN
 
 
 class VkMethods:
