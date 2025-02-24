@@ -9,7 +9,7 @@ from typing import NamedTuple
 import arrow
 
 import avia_bot.services.tickets_api as tickets_api
-from avia_bot.config import (
+from avia_bot.configs.config import (
     aviasales_data_api_url,
     airports_timezone_api_url,
     AVIASALES_API_TOKEN,
@@ -27,7 +27,8 @@ from avia_bot.templates.template_messages import (
 from avia_bot.handlers.exceptions import CriticalExeption, NotCriticalExeption
 from avia_bot.handlers.bot_utils import BotSendMethod
 from avia_bot.handlers.conn_checker import get_connection_status
-from avia_bot.log import log_config
+from avia_bot.services.timezone import get_airport_timezone
+from avia_bot.handlers.log import log_config
 
 
 logging.config.dictConfig(log_config)
@@ -158,11 +159,9 @@ class FlightData:
 
     def get_timezones(self, airport_code):
         """Возвращает временную зону аэропорта назначения"""
-        api = airports_timezone_api_url
-        url_param = [airport_code.lower()]
         while True:
-            request_to_api_for_timezone = self.get_api_data(api, url_param)
-            airport_timezone = request_to_api_for_timezone.json()["timezone"]
+            airport_timezone = get_airport_timezone(airport_code)
+            print(airport_timezone)
             return airport_timezone
 
     def api_response_handle(self, request_to_api):
