@@ -161,7 +161,6 @@ class FlightData:
         """Возвращает временную зону аэропорта назначения"""
         while True:
             airport_timezone = get_airport_timezone(airport_code)
-            print(airport_timezone)
             return airport_timezone
 
     def api_response_handle(self, request_to_api):
