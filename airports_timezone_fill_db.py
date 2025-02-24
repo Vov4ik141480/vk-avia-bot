@@ -17,6 +17,7 @@ def get_airports_timezone():
 
 
 def insert_data():
+    """Получает json из api аэропортов и записывает в таблицу бд."""
     try:
         json_data = get_airports_timezone()
         records = [(item["code"], item["time_zone"]) for item in json_data]
