@@ -9,9 +9,9 @@ import avia_bot.handlers.get_user_data as get_user_data
 import avia_bot.handlers.get_ticket_data as get_ticket_data
 import avia_bot.handlers.send_result as send_result
 from avia_bot.handlers.worker import Worker
-from avia_bot.db import close_db
+from avia_bot.handlers.db_handler import close_db
 from avia_bot.handlers.vk_longpoll import VkServer
-from avia_bot.log import log_config
+from avia_bot.handlers.log import log_config
 
 
 logging.config.dictConfig(log_config)
