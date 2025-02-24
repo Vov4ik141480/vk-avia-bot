@@ -1,6 +1,6 @@
 import requests
 
-from avia_bot.config import API_USERS_GET_URL, VK_BOT_TOKEN, HEADERS
+from avia_bot.configs.config import API_USERS_GET_URL, VK_BOT_TOKEN, HEADERS
 from avia_bot.handlers.exceptions import CriticalExeption, NotCriticalExeption
 
 

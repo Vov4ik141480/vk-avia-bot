@@ -1,5 +1,5 @@
 from avia_bot.services.user_data_api import get_user
-from avia_bot.db import execute
+from avia_bot.handlers.db_handler import execute_add
 
 
 def insert_user(uid):
@@ -8,13 +8,11 @@ def insert_user(uid):
     except Exception():
         return
     else:
+        query = "INSERT OR IGNORE INTO user (user_id, first_name, last_name, mobile_phone) VALUES (?, ?, ?, ?)"
         personal_data = (
             user_data["id"],
             user_data["first_name"],
             user_data["last_name"],
             user_data["mobile_phone"],
         )
-        execute(
-            "INSERT OR IGNORE INTO user (uid, first_name, last_name, mobile_phone) VALUES (?, ?, ?, ?)",
-            personal_data,
-        )
+        execute_add(query, personal_data)
