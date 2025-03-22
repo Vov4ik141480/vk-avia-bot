@@ -13,6 +13,6 @@ def insert_user(uid):
             user_data["id"],
             user_data["first_name"],
             user_data["last_name"],
-            user_data["mobile_phone"],
+            user_data.get("mobile_phone", None)
         )
         execute_add(query, personal_data)
