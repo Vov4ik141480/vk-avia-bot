@@ -43,7 +43,6 @@ class Period(Objects):
     def request_period(self, user_id, request_message):
         """Отправляет запрос юзеру выбрать период поиска"""
         keyboard = period_keyboard.get_keyboard()
-        print("Bot send message")
         self.bot.send_message(user_id, request_message, keyboard)
 
     def check_period(self, user_message):
@@ -126,13 +125,10 @@ class UserData(Period, City, Date):
         инициализирует новый поиск, отправляет info о боте,
         отправляет подсказку.
         """
-        print("Get start searching")
         insert_user(user_id)
-        print("step after insert user")
         if user_message == "start":
             self.bot.send_welcome(user_id)
         elif user_message == "начать поиск":
-            print("Start method request period")
             self.request_period(user_id, message_for_period)
             self.switch_user_status(user_id, "check_period")
         elif user_message == "help":
@@ -234,9 +230,7 @@ class UserData(Period, City, Date):
                     user_data = await self.user_data_queue.get()
                     user_id = user_data.user_id
                     user_message = user_data.text
-                    print("Text from queue", user_message)
                     self.user_data_queue.task_done()
-
                     if user_id in self.users_db:
                         user_status = self.users_db[user_id]["status"]
 
