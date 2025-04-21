@@ -213,7 +213,7 @@ async def process_job(complite_user_data, tickets_queue):
     """Берет из очереди готовые данные, создает экземпляр класса FlightData
     и в отдельном потоке запускает запрос к API
     """
-    while await get_connection_status():
+    while True:
         if not complite_user_data.empty():
             user_data = await complite_user_data.get()
             flight_data = FlightData(user_data, tickets_queue)
